@@ -10,7 +10,7 @@ import static io.restassured.RestAssured.given;
 
 public class CourierSteps {
 
-    @Step("Создание курьера с использованием класса")
+    @Step("Создание курьера")
     public static Response createCourier(CourierModel courierModel) {
         return given()
                 .contentType(ContentType.JSON)
@@ -20,38 +20,11 @@ public class CourierSteps {
                 .extract().response();
     }
 
-    @Step("Создание курьера с использованием тела")
-    public static Response createCourier(String password) {
-        String body = String.format
-                ("{\n" + "\"password\": \"%s\"\n}", password);
-
+    @Step("Авторизация курьера")
+    public static Response loginCourier(CourierModel courierModel) {
         return given()
                 .contentType(ContentType.JSON)
-                .body(body)
-                .post(PATH_CREATED)
-                .then()
-                .extract().response();
-    }
-
-    @Step("Авторизация курьера с валидными данными")
-    public static Response loginCourierWithValidData(String login, String password) {
-        String body = String.format
-                ("{\n\"login\": \"%s\"" + ",\n" + "\"password\": \"%s\"\n}", login, password);
-        return given()
-                .contentType(ContentType.JSON)
-                .body(body)
-                .post(PATH_COURIER_LOGIN)
-                .then()
-                .extract().response();
-    }
-
-    @Step("Авторизация курьера с невалидными данными")
-    public static Response loginCourierWithInvalidData(String password) {
-        String body = String.format
-                ("{\n" +"\"password\": \"%s\"\n}", password);
-        return given()
-                .contentType(ContentType.JSON)
-                .body(body)
+                .body(courierModel)
                 .post(PATH_COURIER_LOGIN)
                 .then()
                 .extract().response();

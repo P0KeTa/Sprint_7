@@ -2,6 +2,8 @@ import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import models.CourierModel;
 import models.OrderModel;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static data.TestData.*;
@@ -12,18 +14,23 @@ import static steps.OrderSteps.*;
 
 public class SetOrderAPITest extends BaseAPITest {
 
-    private final CourierModel courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
     private final OrderModel orderModel = new OrderModel(
             "David", "Taziashvili", "Engels",
             "Centre", "89091234567", 10,
             "01.01.2025", "...", new String[]{"GRAY"});
+    private CourierModel courierModel;
+
+    @Before
+    public void createClass() {
+        courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+    }
 
     @Test
     @DisplayName("Успешный запрос на принятие заказа")
     @Description("успешный запрос возвращает ok: true;")
     public void setValidOrderTest() {
         createCourier(courierModel);
-        CourierModel.id = loginCourierWithValidData(LOGIN, PASSWORD).jsonPath().getInt("id");
+        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
         OrderModel.track = createOrder(orderModel).jsonPath().getInt("track");
         OrderModel.id = getOrderWithData(OrderModel.track).jsonPath().getInt("order.id");
 
@@ -85,7 +92,7 @@ public class SetOrderAPITest extends BaseAPITest {
     @Description("если передать неверный номер заказа, запрос вернёт ошибку.")
     public void setInvalidOrderNumberTest() {
         createCourier(courierModel);
-        CourierModel.id = loginCourierWithValidData(LOGIN, PASSWORD).jsonPath().getInt("id");
+        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
         OrderModel.id = 123;
 
         setOrderWithValidData(OrderModel.id, CourierModel.id)
@@ -93,5 +100,17 @@ public class SetOrderAPITest extends BaseAPITest {
                 .statusCode(HTTP_NOT_FOUND)
                 .and()
                 .assertThat().body("message", equalTo("Заказа с таким id не существует"));
+    }
+
+    @After
+    @DisplayName("Получение ID и удаление курьера после каждого теста")
+    public void logOutAndDelete() {
+        try {
+            courierModel.setFirstName("");
+            CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
+            deleteCourier(CourierModel.id);
+        } catch (Exception e) {
+            System.err.println("Ошибка при удалении курьера в @After: " + e.getMessage());
+        }
     }
 }

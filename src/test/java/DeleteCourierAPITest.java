@@ -1,6 +1,8 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import models.CourierModel;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static data.TestData.*;
@@ -10,14 +12,20 @@ import static steps.CourierSteps.*;
 
 public class DeleteCourierAPITest extends BaseAPITest{
 
-    private final CourierModel courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+    private CourierModel courierModel;
+
+    @Before
+    public void createClass() {
+        courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+    }
 
     @Test
     @DisplayName("Успешное удаление курьера при вводе валидного значения")
     @Description("успешный запрос возвращает ok: true;")
     public void deleteCourierWithValidDataTest() {
         createCourier(courierModel);
-        CourierModel.id = loginCourierWithValidData(LOGIN, PASSWORD).jsonPath().getInt("id");
+        courierModel.setFirstName("");
+        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
         deleteCourier(CourierModel.id)
                 .then()
                 .statusCode(HTTP_OK)
