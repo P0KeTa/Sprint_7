@@ -1,5 +1,6 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.Response;
 import models.CourierModel;
 import org.junit.After;
 import org.junit.Before;
@@ -9,14 +10,19 @@ import static data.TestData.*;
 import static java.net.HttpURLConnection.*;
 import static org.hamcrest.Matchers.equalTo;
 import static steps.CourierSteps.*;
+import static steps.CourierSteps.createCourier;
 
 public class CreateCourierAPITest extends BaseAPITest {
 
-    private CourierModel courierModel;
+    Response response;
+    CourierModel courierModel;
 
     @Before
-    public void createClass() {
+    public void createCourierModel() {
         courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+        response = createCourier(courierModel);
+        courierModel.setFirstName("");
+        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
     }
 
     @Test
@@ -26,7 +32,7 @@ public class CreateCourierAPITest extends BaseAPITest {
             "запрос возвращает правильный код ответа;" +
             "успешный запрос возвращает ok: true;")
     public void canCreteCourierTest() {
-        createCourier(courierModel)
+        response
                 .then()
                 .statusCode(HTTP_CREATED)
                 .and()
@@ -38,7 +44,6 @@ public class CreateCourierAPITest extends BaseAPITest {
     @Description("нельзя создать двух одинаковых курьеров;" +
             "если создать пользователя с логином, который уже есть, возвращается ошибка.")
     public void canSameCreteCourierTest() {
-        createCourier(courierModel);
         createCourier(courierModel)
                 .then()
                 .statusCode(HTTP_CONFLICT)
@@ -47,11 +52,11 @@ public class CreateCourierAPITest extends BaseAPITest {
     }
 
     @Test
-    @DisplayName("Создание курьера с одним полем")
+    @DisplayName("Создание курьера с одним полем Логин")
     @Description("если одного из полей нет, запрос возвращает ошибку;")
     public void canCreteCourierWithOneLoginTest() {
         courierModel.setPassword("");
-        courierModel.setPassword("");
+        courierModel.setFirstName("");
         createCourier(courierModel)
                 .then()
                 .statusCode(HTTP_BAD_REQUEST)
@@ -60,11 +65,11 @@ public class CreateCourierAPITest extends BaseAPITest {
     }
 
     @Test
-    @DisplayName("Создание курьера с одним полем")
+    @DisplayName("Создание курьера с одним полем Пароль")
     @Description("если одного из полей нет, запрос возвращает ошибку;")
-    public void canCreteCourierWithOneFieldTest() {
-        courierModel.setLogin("");
+    public void canCreteCourierWithOnePasswordTest() {
         courierModel.setFirstName("");
+        courierModel.setLogin("");
         createCourier(courierModel)
                 .then()
                 .statusCode(HTTP_BAD_REQUEST)
@@ -76,8 +81,6 @@ public class CreateCourierAPITest extends BaseAPITest {
     @DisplayName("Получение ID и удаление курьера после каждого теста")
     public void logOutAndDelete() {
         try {
-                courierModel.setFirstName("");
-                CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
                 deleteCourier(CourierModel.id);
         } catch (Exception e) {
             System.err.println("Ошибка при удалении курьера в @After: " + e.getMessage());

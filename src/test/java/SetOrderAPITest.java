@@ -18,19 +18,19 @@ public class SetOrderAPITest extends BaseAPITest {
             "David", "Taziashvili", "Engels",
             "Centre", "89091234567", 10,
             "01.01.2025", "...", new String[]{"GRAY"});
-    private CourierModel courierModel;
 
     @Before
-    public void createClass() {
-        courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+    public void createCourierModel() {
+        CourierModel courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+        createCourier(courierModel);
+        courierModel.setFirstName("");
+        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
     }
 
     @Test
     @DisplayName("Успешный запрос на принятие заказа")
     @Description("успешный запрос возвращает ok: true;")
     public void setValidOrderTest() {
-        createCourier(courierModel);
-        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
         OrderModel.track = createOrder(orderModel).jsonPath().getInt("track");
         OrderModel.id = getOrderWithData(OrderModel.track).jsonPath().getInt("order.id");
 
@@ -45,7 +45,6 @@ public class SetOrderAPITest extends BaseAPITest {
     @DisplayName("Запрос на принятие заказа с невалидным ID курьера")
     @Description("если передать неверный id курьера, запрос вернёт ошибку;")
     public void setInvalidIdOrderTest() {
-        createCourier(courierModel);
         CourierModel.id = 123;
         OrderModel.track = createOrder(orderModel).jsonPath().getInt("track");
         OrderModel.id = getOrderWithData(OrderModel.track).jsonPath().getInt("order.id");
@@ -75,7 +74,6 @@ public class SetOrderAPITest extends BaseAPITest {
     @DisplayName("Запрос на принятие заказа без номера заказа")
     @Description("если не передать номер заказа, запрос вернёт ошибку;")
     public void setWithoutOrderNumberTest() {
-        createCourier(courierModel);
         CourierModel.id = 123;
         OrderModel.track = createOrder(orderModel).jsonPath().getInt("track");
         OrderModel.id = getOrderWithData(OrderModel.track).jsonPath().getInt("order.id");
@@ -91,8 +89,6 @@ public class SetOrderAPITest extends BaseAPITest {
     @DisplayName("Запрос на принятие заказа с неверным номером заказа")
     @Description("если передать неверный номер заказа, запрос вернёт ошибку.")
     public void setInvalidOrderNumberTest() {
-        createCourier(courierModel);
-        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
         OrderModel.id = 123;
 
         setOrderWithValidData(OrderModel.id, CourierModel.id)
@@ -106,8 +102,6 @@ public class SetOrderAPITest extends BaseAPITest {
     @DisplayName("Получение ID и удаление курьера после каждого теста")
     public void logOutAndDelete() {
         try {
-            courierModel.setFirstName("");
-            CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
             deleteCourier(CourierModel.id);
         } catch (Exception e) {
             System.err.println("Ошибка при удалении курьера в @After: " + e.getMessage());

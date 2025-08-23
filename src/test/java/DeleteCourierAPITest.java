@@ -12,20 +12,20 @@ import static steps.CourierSteps.*;
 
 public class DeleteCourierAPITest extends BaseAPITest{
 
-    private CourierModel courierModel;
+    CourierModel courierModel;
 
     @Before
-    public void createClass() {
+    public void createCourierModel() {
         courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+        createCourier(courierModel);
+        courierModel.setFirstName("");
+        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
     }
 
     @Test
     @DisplayName("Успешное удаление курьера при вводе валидного значения")
     @Description("успешный запрос возвращает ok: true;")
     public void deleteCourierWithValidDataTest() {
-        createCourier(courierModel);
-        courierModel.setFirstName("");
-        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
         deleteCourier(CourierModel.id)
                 .then()
                 .statusCode(HTTP_OK)
@@ -38,6 +38,7 @@ public class DeleteCourierAPITest extends BaseAPITest{
     @Description("неуспешный запрос возвращает соответствующую ошибку;" +
             "если отправить запрос без id, вернётся ошибка;")
     public void deleteCourierWithoutDataTest() {
+        CourierModel.id = 0;
         deleteCourier(CourierModel.id)
                 .then()
                 .statusCode(HTTP_BAD_REQUEST)
@@ -56,5 +57,16 @@ public class DeleteCourierAPITest extends BaseAPITest{
                 .statusCode(HTTP_NOT_FOUND)
                 .and()
                 .assertThat().body("message", equalTo("Курьера с таким id нет."));
+    }
+
+    @After
+    @DisplayName("Получение ID и удаление курьера после каждого теста")
+    public void logOutAndDelete() {
+        try {
+            CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
+            deleteCourier(CourierModel.id);
+        } catch (Exception e) {
+            System.err.println("Ошибка при удалении курьера в @After: " + e.getMessage());
+        }
     }
 }

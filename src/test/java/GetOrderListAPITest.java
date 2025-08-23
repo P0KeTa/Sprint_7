@@ -1,6 +1,5 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.response.Response;
 import models.CourierModel;
 import org.junit.After;
 import org.junit.Before;
@@ -15,21 +14,18 @@ import static steps.OrderSteps.getOrderList;
 
 public class GetOrderListAPITest extends BaseAPITest {
 
-    private CourierModel courierModel;
-
     @Before
-    public void createClass() {
-        courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+    public void createCourierModel() {
+        CourierModel courierModel = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+        createCourier(courierModel);
+        courierModel.setFirstName("");
+        CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
     }
 
     @Test
     @DisplayName("Проверка списка заказов")
     @Description("Тело ответа возвращается список заказов.")
     public void getOrderListTest() {
-        createCourier(courierModel);
-        courierModel.setFirstName("");
-        Response response = loginCourier(courierModel);
-        CourierModel.id = response.jsonPath().getInt("id");
         getOrderList()
                 .then()
                 .statusCode(HTTP_OK)
@@ -43,8 +39,6 @@ public class GetOrderListAPITest extends BaseAPITest {
     @DisplayName("Получение ID и удаление курьера после каждого теста")
     public void logOutAndDelete() {
         try {
-            courierModel.setFirstName("");
-            CourierModel.id = loginCourier(courierModel).jsonPath().getInt("id");
             deleteCourier(CourierModel.id);
         } catch (Exception e) {
             System.err.println("Ошибка при удалении курьера в @After: " + e.getMessage());
