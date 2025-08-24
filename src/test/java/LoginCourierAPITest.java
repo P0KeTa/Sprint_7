@@ -30,7 +30,7 @@ public class LoginCourierAPITest extends BaseAPITest {
     @Description("курьер может авторизоваться;" +
             "для авторизации нужно передать все обязательные поля;" +
             "успешный запрос возвращает id.")
-    public void LoginCourierTest() {
+    public void loginCourierTest() {
         response
                 .then()
                 .statusCode(HTTP_OK)
@@ -43,7 +43,7 @@ public class LoginCourierAPITest extends BaseAPITest {
     @Test
     @DisplayName("Тест на Логин курьера с невалидным Логином и Паролем")
     @Description("если авторизоваться под несуществующим пользователем, запрос возвращает ошибку;")
-    public void LoginWithWrongLoginAndPasswordCourierTest() {
+    public void loginWithWrongLoginAndPasswordCourierTest() {
         courierModel.setLogin("Oleg");
         courierModel.setPassword("4321");
         courierModel.setFirstName("");
@@ -57,7 +57,7 @@ public class LoginCourierAPITest extends BaseAPITest {
     @Test
     @DisplayName("Тест на Логин курьера с невалидным Логином")
     @Description("система вернёт ошибку, если неправильно указать логин или пароль;")
-    public void LoginWithWrongLoginCourierTest() {
+    public void loginWithWrongLoginCourierTest() {
         courierModel.setLogin("Oleg");
         courierModel.setFirstName("");
         loginCourier(courierModel)
@@ -70,7 +70,7 @@ public class LoginCourierAPITest extends BaseAPITest {
     @Test
     @DisplayName("Тест на Логин курьера с невалидным Паролем")
     @Description("система вернёт ошибку, если неправильно указать логин или пароль;")
-    public void LoginWithWrongPasswordCourierTest() {
+    public void loginWithWrongPasswordCourierTest() {
         courierModel.setPassword("4321");
         courierModel.setFirstName("");
         loginCourier(courierModel)
@@ -83,7 +83,7 @@ public class LoginCourierAPITest extends BaseAPITest {
     @Test
     @DisplayName("Тест на Логин курьера с пустым полем Пароль")
     @Description("если какого-то поля нет, запрос возвращает ошибку;")
-    public void LoginWithOneFieldPasswordCourierTest() {
+    public void loginWithOneFieldPasswordCourierTest() {
         courierModel.setPassword("");
         courierModel.setFirstName("");
         loginCourier(courierModel)
@@ -96,7 +96,7 @@ public class LoginCourierAPITest extends BaseAPITest {
     @Test
     @DisplayName("Тест на Логин курьера с пустым полем Логин")
     @Description("если какого-то поля нет, запрос возвращает ошибку;")
-    public void LoginWithOneFieldLoginCourierTest() {
+    public void loginWithOneFieldLoginCourierTest() {
         courierModel.setLogin("");
         courierModel.setFirstName("");
         loginCourier(courierModel)
